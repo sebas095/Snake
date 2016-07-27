@@ -19,11 +19,33 @@
     draw() {
       this.head.draw();
     }
+
+
+    right() {
+      this.head.x += 10;
+    }
+
+    left() {
+      this.head.x -= 10;
+    }
+
+    up() {
+      this.head.y -= 10;
+    }
+
+    down() {
+      this.head.y += 10;
+    }
   }
 
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
 
   const snake = new Snake();
+  setInterval(() => {
+    snake.right();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    snake.draw();
+  }, 1000 / 5);
 
 })();
