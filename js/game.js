@@ -13,6 +13,7 @@
   class Snake {
     constructor() {
       this.head = new Square(100, 0);
+      this.direction = 'right';
       this.draw();
     }
 
@@ -22,28 +23,42 @@
 
 
     right() {
-      this.head.x += 10;
+      this.direction = 'right';
     }
 
     left() {
-      this.head.x -= 10;
+      this.direction = 'left';
     }
 
     up() {
-      this.head.y -= 10;
+      this.direction = 'up';
     }
 
     down() {
-      this.head.y += 10;
+      this.direction = 'down';
+    }
+
+    move() {
+      if (this.direction === 'up')    return this.head.y -= 10;
+      if (this.direction === 'down')  return this.head.y += 10;
+      if (this.direction === 'left')  return this.head.x -= 10;
+      if (this.direction === 'right') return this.head.x += 10;
     }
   }
 
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
-
   const snake = new Snake();
+
+  window.addEventListener('keydown', (ev) => {
+    if (ev.keyCode == 38) return snake.up();
+    if (ev.keyCode == 40) return snake.down();
+    if (ev.keyCode == 39) return snake.right();
+    if (ev.keyCode == 37) return snake.left();
+  });
+
   setInterval(() => {
-    snake.right();
+    snake.move();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     snake.draw();
   }, 1000 / 5);
