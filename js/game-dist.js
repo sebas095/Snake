@@ -25,6 +25,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: 'add',
       value: function add() {
+        if (this.hasBack()) return this.back.add();
         this.back = new Square(this.x, this.y);
       }
     }, {
@@ -36,6 +37,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       key: 'copy',
       value: function copy() {
         if (this.hasBack()) {
+          this.back.copy();
           this.back.x = this.x;
           this.back.y = this.y;
         }
@@ -75,6 +77,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
       this.head = new Square(100, 0);
       this.direction = 'right';
+      this.head.add();
+      this.head.add();
+      this.head.add();
+      this.head.add();
       this.head.add();
       this.draw();
     }
