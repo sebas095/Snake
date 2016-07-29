@@ -1,4 +1,25 @@
 (function() {
+  class Random {
+    static get(inicio, final) {
+      return Math.floor(Math.random() * final) + inicio;
+    }
+  }
+
+  class Food {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+    }
+
+    static generate() {
+      return new Food(Random.get(0, 500), Random.get(0, 300));
+    }
+
+    draw() {
+      ctx.fillRect(this.x, this.y, 10, 10);
+    }
+  }
+
   class Square {
     constructor(x, y) {
       this.x = x;
@@ -94,6 +115,7 @@
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
   const snake = new Snake();
+  let foods = [];
 
   window.addEventListener('keydown', (ev) => {
     ev.preventDefault();
@@ -110,6 +132,27 @@
     snake.move();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     snake.draw();
+    drawFood();
   }, 1000 / 5);
 
+  setInterval(() => {
+    const food = Food.generate();
+    foods.push(food);
+    setTimeout(() => {
+      // Elimina la comida
+      removeFromFoods(food);
+    }, 10000);
+  }, 4000);
+
+
+  function drawFood() {
+    for (const index in foods) {
+      const food = foods[index];
+      food.draw();
+    }
+  }
+
+  function removeFromFoods(food) {
+    foods = foods.filter(f => food !== f);
+  }
 })();

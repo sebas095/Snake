@@ -5,6 +5,44 @@ var _createClass = (function () { function defineProperties(target, props) { for
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 (function () {
+  var Random = (function () {
+    function Random() {
+      _classCallCheck(this, Random);
+    }
+
+    _createClass(Random, null, [{
+      key: 'get',
+      value: function get(inicio, final) {
+        return Math.floor(Math.random() * final) + inicio;
+      }
+    }]);
+
+    return Random;
+  })();
+
+  var Food = (function () {
+    function Food(x, y) {
+      _classCallCheck(this, Food);
+
+      this.x = x;
+      this.y = y;
+    }
+
+    _createClass(Food, [{
+      key: 'draw',
+      value: function draw() {
+        ctx.fillRect(this.x, this.y, 10, 10);
+      }
+    }], [{
+      key: 'generate',
+      value: function generate() {
+        return new Food(Random.get(0, 500), Random.get(0, 300));
+      }
+    }]);
+
+    return Food;
+  })();
+
   var Square = (function () {
     function Square(x, y) {
       _classCallCheck(this, Square);
@@ -126,17 +164,45 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   var canvas = document.getElementById('canvas');
   var ctx = canvas.getContext('2d');
   var snake = new Snake();
+  var foods = [];
 
   window.addEventListener('keydown', function (ev) {
+    ev.preventDefault();
+
     if (ev.keyCode === 38 || ev.keyCode === 87) return snake.up();
     if (ev.keyCode === 40 || ev.keyCode === 83) return snake.down();
     if (ev.keyCode === 39 || ev.keyCode === 68) return snake.right();
     if (ev.keyCode === 37 || ev.keyCode === 65) return snake.left();
+
+    return false;
   });
 
   setInterval(function () {
     snake.move();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     snake.draw();
+    drawFood();
   }, 1000 / 5);
+
+  setInterval(function () {
+    var food = Food.generate();
+    foods.push(food);
+    setTimeout(function () {
+      // Elimina la comida
+      removeFromFoods(food);
+    }, 10000);
+  }, 4000);
+
+  function drawFood() {
+    for (var index in foods) {
+      var food = foods[index];
+      food.draw();
+    }
+  }
+
+  function removeFromFoods(food) {
+    foods = foods.filter(function (f) {
+      return food !== f;
+    });
+  }
 })();
