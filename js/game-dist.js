@@ -26,12 +26,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
       this.x = x;
       this.y = y;
+      this.width = 10;
+      this.height = 10;
     }
 
     _createClass(Food, [{
       key: 'draw',
       value: function draw() {
-        ctx.fillRect(this.x, this.y, 10, 10);
+        ctx.fillRect(this.x, this.y, this.width, this.height);
       }
     }], [{
       key: 'generate',
@@ -49,13 +51,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
       this.x = x;
       this.y = y;
+      this.width = 10;
+      this.height = 10;
       this.back = null; // Cuadrado de atras
     }
 
     _createClass(Square, [{
       key: 'draw',
       value: function draw() {
-        ctx.fillRect(this.x, this.y, 10, 10);
+        ctx.fillRect(this.x, this.y, this.width, this.height);
         if (this.hasBack()) {
           this.back.draw();
         }
@@ -156,6 +160,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         if (this.direction === 'left') return this.head.left();
         if (this.direction === 'right') return this.head.right();
       }
+    }, {
+      key: 'eat',
+      value: function eat() {
+        this.head.add();
+      }
     }]);
 
     return Snake;
@@ -165,10 +174,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   var ctx = canvas.getContext('2d');
   var snake = new Snake();
   var foods = [];
+  var keys = [37, 38, 39, 40, 65, 68, 83, 87];
 
   window.addEventListener('keydown', function (ev) {
-    ev.preventDefault();
-
+    if (ev.keyCode in keys) ev.preventDefault();
     if (ev.keyCode === 38 || ev.keyCode === 87) return snake.up();
     if (ev.keyCode === 40 || ev.keyCode === 83) return snake.down();
     if (ev.keyCode === 39 || ev.keyCode === 68) return snake.right();
@@ -196,7 +205,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   function drawFood() {
     for (var index in foods) {
       var food = foods[index];
-      food.draw();
+      if (typeof food !== 'undefined') {
+        food.draw();
+        if (hit(food, snake.head)) {
+          snake.eat();
+          removeFromFoods(food);
+        }
+      } else console.log('HI');
     }
   }
 
@@ -204,5 +219,26 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     foods = foods.filter(function (f) {
       return food !== f;
     });
+  }
+
+  function hit(a, b) {
+    var hit = false;
+    // Colisiones horizontales
+    if (b.x + b.width >= a.x && b.x < a.x + a.width) {
+      // Colisiones verticales
+      if (b.y + b.height >= a.y && b.y < a.y + a.width) hit = true;
+    }
+
+    // Colisión de a con b
+    if (b.x <= a.x && b.x + b.width >= a.x + a.width) {
+      if (b.y <= a.y && b.y + b.height >= a.y + a.height) hit = true;
+    }
+
+    // Colisión de b con a
+    if (a.x <= b.x && a.x + a.width >= b.x + b.width) {
+      if (a.y <= b.y && a.y + a.height >= b.y + b.height) hit = true;
+    }
+
+    return hit;
   }
 })();
