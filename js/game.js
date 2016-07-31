@@ -74,12 +74,30 @@
       this.copy();
       this.y += 10;
     }
+
+    hit(head, second = false) {
+      if (this === head && !this.hasBack()) return false;
+      if (this === head) return this.back.hit(head, true);
+      if (second && !this.hasBack()) return false;
+      if (second) return this.back.hit(head);
+
+      // No es ni la cabeza, ni el segundo
+      if (this.hasBack()) return SquareHit(this, head) || this.back.hit(head);
+
+      // No es la cabeza, ni el segundo, y soy el último
+      return SquareHit(this, head);
+    }
+
+    hitBorder() {
+      return (this.x > 490 || this.x < 0 || this.y > 290 || this.y < 0);
+    }
   }
 
   class Snake {
     constructor() {
       this.head = new Square(100, 0);
       this.direction = 'right';
+      this.head.add();
       this.head.add();
       this.head.add();
       this.head.add();
@@ -93,18 +111,22 @@
     }
 
     right() {
+      if (this.direction === 'left') return;
       this.direction = 'right';
     }
 
     left() {
+      if (this.direction === 'right') return;
       this.direction = 'left';
     }
 
     up() {
+      if (this.direction === 'down') return;
       this.direction = 'up';
     }
 
     down() {
+      if (this.direction === 'up') return;
       this.direction = 'down';
     }
 
@@ -116,15 +138,23 @@
     }
 
     eat() {
+      points++;
       this.head.add();
+    }
+
+    dead() {
+      return this.head.hit(this.head) || this.head.hitBorder();
     }
   }
 
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
+  const gameOver = document.getElementById('game-over');
+  const score = document.getElementById('count');
   const snake = new Snake();
-  let foods = [];
   const keys = [37, 38, 39, 40, 65, 68, 83, 87];
+  let points = 0;
+  let foods = [];
 
   window.addEventListener('keydown', (ev) => {
     if (ev.keyCode in keys) ev.preventDefault();
@@ -136,11 +166,17 @@
     return false;
   });
 
-  setInterval(() => {
+  const animacion = setInterval(() => {
     snake.move();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     snake.draw();
     drawFood();
+    score.innerText = setPoints(points);
+
+    if (snake.dead()) {
+      gameOver.style.display = 'inline-flex';
+      window.clearInterval(animacion);
+    }
   }, 1000 / 5);
 
   setInterval(() => {
@@ -163,12 +199,21 @@
           removeFromFoods(food);
         }
       }
-      else console.log("HI");
     }
+  }
+
+  function setPoints(points) {
+    let p = "" + points;
+    while (p.length < 3) p = "0" + p;
+    return p;
   }
 
   function removeFromFoods(food) {
     foods = foods.filter(f => food !== f);
+  }
+
+  function SquareHit(square1, square2) {
+    return square1.x === square2.x && square1.y === square2.y;
   }
 
   function hit(a, b) {

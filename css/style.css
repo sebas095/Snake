@@ -1,3 +1,7 @@
+.font {
+  font-family: 'Black Ops One', cursive;
+}
+
 body {
   text-align: center;
 }
@@ -7,4 +11,15 @@ canvas {
   top: 30%;
   left: 30%;
   border: solid;
+}
+
+#game-over {
+  display: none;
+}
+
+#score {
+  display: inline-block;
+  position: absolute;
+  top: 77%;
+  left: 30%;
 }

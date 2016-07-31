@@ -108,6 +108,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         this.copy();
         this.y += 10;
       }
+    }, {
+      key: 'hit',
+      value: function hit(head) {
+        var second = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
+        if (this === head && !this.hasBack()) return false;
+        if (this === head) return this.back.hit(head, true);
+        if (second && !this.hasBack()) return false;
+        if (second) return this.back.hit(head);
+
+        // No es ni la cabeza, ni el segundo
+        if (this.hasBack()) return SquareHit(this, head) || this.back.hit(head);
+
+        // No es la cabeza, ni el segundo, y soy el último
+        return SquareHit(this, head);
+      }
+    }, {
+      key: 'hitBorder',
+      value: function hitBorder() {
+        return this.x > 490 || this.x < 0 || this.y > 290 || this.y < 0;
+      }
     }]);
 
     return Square;
@@ -124,6 +145,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       this.head.add();
       this.head.add();
       this.head.add();
+      this.head.add();
       this.draw();
     }
 
@@ -135,21 +157,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: 'right',
       value: function right() {
+        if (this.direction === 'left') return;
         this.direction = 'right';
       }
     }, {
       key: 'left',
       value: function left() {
+        if (this.direction === 'right') return;
         this.direction = 'left';
       }
     }, {
       key: 'up',
       value: function up() {
+        if (this.direction === 'down') return;
         this.direction = 'up';
       }
     }, {
       key: 'down',
       value: function down() {
+        if (this.direction === 'up') return;
         this.direction = 'down';
       }
     }, {
@@ -163,7 +189,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: 'eat',
       value: function eat() {
+        points++;
         this.head.add();
+      }
+    }, {
+      key: 'dead',
+      value: function dead() {
+        return this.head.hit(this.head) || this.head.hitBorder();
       }
     }]);
 
@@ -172,9 +204,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
   var canvas = document.getElementById('canvas');
   var ctx = canvas.getContext('2d');
+  var gameOver = document.getElementById('game-over');
+  var score = document.getElementById('count');
   var snake = new Snake();
-  var foods = [];
   var keys = [37, 38, 39, 40, 65, 68, 83, 87];
+  var points = 0;
+  var foods = [];
 
   window.addEventListener('keydown', function (ev) {
     if (ev.keyCode in keys) ev.preventDefault();
@@ -186,11 +221,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return false;
   });
 
-  setInterval(function () {
+  var animacion = setInterval(function () {
     snake.move();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     snake.draw();
     drawFood();
+    score.innerText = setPoints(points);
+
+    if (snake.dead()) {
+      gameOver.style.display = 'inline-flex';
+      window.clearInterval(animacion);
+    }
   }, 1000 / 5);
 
   setInterval(function () {
@@ -211,14 +252,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           snake.eat();
           removeFromFoods(food);
         }
-      } else console.log('HI');
+      }
     }
+  }
+
+  function setPoints(points) {
+    var p = '' + points;
+    while (p.length < 3) p = '0' + p;
+    return p;
   }
 
   function removeFromFoods(food) {
     foods = foods.filter(function (f) {
       return food !== f;
     });
+  }
+
+  function SquareHit(square1, square2) {
+    return square1.x === square2.x && square1.y === square2.y;
   }
 
   function hit(a, b) {
